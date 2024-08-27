@@ -1,3 +1,6 @@
 FROM debian:12-slim
 
-CMD /sbin/init
+ADD run.sh /usr/local/bin/run.sh
+RUN chmod u+x /usr/local/bin/run.sh
+
+ENTRYPOINT ["run.sh"]
