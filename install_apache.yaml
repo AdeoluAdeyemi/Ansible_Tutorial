@@ -20,3 +20,12 @@
       name: libapache2-mod-php
       state: latest
     when: ansible_distribution == "ubuntu"
+  
+  - name: copy default html files to remote server
+    tags: apache, copy
+    copy:
+      src: default_site.html
+      dest: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: 0644
