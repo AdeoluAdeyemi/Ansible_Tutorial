@@ -1,0 +1,45 @@
+---
+- hosts: all
+  become: true
+  pre_tasks:
+
+  - name: Upgrade server and update server cache and
+    tags: always
+    package:
+      install_recommends: yes
+      upgrade: yes
+      update_cache: yes
+
+- hosts: all
+  become: true
+  tasks:
+    
+    - name: Install apache server and php  
+      tags: apache, php
+      apt:
+        name:
+          - apache2
+          - libapache2-mod-php
+        state: latest
+      register: apache
+      #notify: restart_apache
+
+    - name: Enable and restart apache server
+      tags: apache
+      service:
+        name: apache2
+        state: restarted
+        enabled: true
+      when: apache.changed
+
+    - name: Install Mariadb server
+      tags: db
+      apt:
+        name: mariadb-server
+        state: latest
+    
+    - name: Install fileserver
+      tags: fileserver
+      apt:
+        name: samba
+        state: latest
