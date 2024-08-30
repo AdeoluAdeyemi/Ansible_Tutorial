@@ -1,8 +1,8 @@
 [webServer]
-192.168.1.12 apache_package_name=apache2 apache_service_name=apache2  php_package_name=libapache2-mod-php
+192.168.1.12
 
 [databaseServer]
-192.168.1.14 apache_package_name=apache2 apache_service_name=apache2  php_package_name=libapache2-mod-php
+192.168.1.14
 
 [fileServer]
-192.168.1.17 apache_package_name=httpd apache_service_name=httpd  php_package_name=php
+192.168.1.17

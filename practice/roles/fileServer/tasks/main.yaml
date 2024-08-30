@@ -1,0 +1,5 @@
+- name: Install fileserver
+  tags: fileserver
+  dnf:
+    name: samba
+    state: latest

@@ -1,0 +1,62 @@
+---
+
+- name: Installing updates
+  hosts: all
+  become: true
+  pre_tasks:
+
+  - name: install updates (CentOS)
+    tags: always
+    dnf:
+      update_only: yes
+      update_cache: yes  
+    when: ansible_facts['distribution'] == "CentOS"
+
+
+  - name: install updates (Ubuntu)
+    tags: always
+    apt:
+      install_recommends: yes
+      upgrade: yes
+      update_cache: yes  
+    when: ansible_distribution == 'Ubuntu'
+
+
+- name: Bootstrapping new node
+  hosts: all
+  become: true
+  tasks:
+  
+  - name: Create new user
+    tags: always
+    user:
+      name: adeolu
+      groups: root
+
+  - name: add ssh key for new user  
+    tags: always
+    authorized_key:
+      user: adeolu
+      key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIG549KXGiy1IYkrrPimPas4h+bBsrnPJgnSuwRedZmaz Ubuntu WSL Key
+
+  - name: add sudoers file for user
+    copy:
+      src: sudoer_adeolu
+      dest: /etc/sudoers.d/adeolu
+      owner: root
+      group: root
+      mode: 0440
+
+  - name: add sudoers file for ubuntu
+    copy:
+      src: sudoer_ubuntu
+      dest: /etc/sudoers.d/ubuntu
+      owner: root
+      group: root
+      mode: 0440
+
+  - name: add ssh key for ansible 
+    tags: always
+    authorized_key:
+      user: ubuntu
+      key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJh4NUmKXU/QkQSbsfZNaXcpYuc6BM1jNlTv+Xi9pwtV Ansible Key
