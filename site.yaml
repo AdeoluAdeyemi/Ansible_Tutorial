@@ -14,14 +14,14 @@
 
 
 - name: Database play
-- hosts: databaseServer
+  hosts: databaseServer
   become: true
   roles:
     - databaseServer
 
 
 - name: File server play
-- hosts: fileServer    
+  hosts: fileServer    
   become: true
   roles:
     - fileServer
