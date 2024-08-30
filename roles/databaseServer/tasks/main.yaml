@@ -1,0 +1,5 @@
+- name: Install Mariadb server
+  tags: db
+  apt:
+    name: mariadb-server
+    state: latest

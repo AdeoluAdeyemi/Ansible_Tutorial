@@ -1,0 +1,36 @@
+- name: Install apache server and php  
+  tags: apache, php, centos
+  apt:
+    name:
+      - "{{ apache_package_name }}"
+      - "{{ php_package_name }}"
+    state: latest
+  register: apache
+  #notify: restart_apache
+
+- name: Enable and restart apache server
+  tags: apache, centos
+  service:
+    name: "{{ apache_service_name }}"
+    state: restarted
+    enabled: true
+  when: apache.changed
+
+- name: Copy default apache file
+  copy:
+    src: index.html
+    dest: /var/www/html/index.html
+    owner: root
+    group: root
+    mode: 0644
+  #register: copyFile
+
+- name: Update default apache file on remote
+  lineinfile:
+    path: /var/www/html/index.html
+    # regexp: '^<h1>'
+    # line: '<h1>Hello, World from {{ansible_nodename}}!</h1>'
+    regexp: '^(\s*)<h1>.*</h1>'
+    line: '\1<h1>Hello, World from {{ansible_eth0.ipv4.address}} -{{ansible_nodename}}!</h1>'
+    backrefs: yes
+  #when: copyFile.changed
