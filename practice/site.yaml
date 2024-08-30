@@ -1,45 +1,81 @@
 ---
 - hosts: all
   become: true
+  remote_user: ubuntu
   pre_tasks:
 
   - name: Upgrade server and update server cache and
     tags: always
     package:
-      install_recommends: yes
-      upgrade: yes
+      #install_recommends: yes
+      #upgrade: yes
       update_cache: yes
 
 - hosts: all
   become: true
+  remote_user: ubuntu
   tasks:
     
-    - name: Install apache server and php  
-      tags: apache, php
-      apt:
-        name:
-          - apache2
-          - libapache2-mod-php
-        state: latest
-      register: apache
-      #notify: restart_apache
+  - name: Install apache server and php  
+    tags: apache, php, centos
+    apt:
+      name:
+        - "{{ apache_package_name }}"
+        - "{{ php_package_name }}"
+      state: latest
+    register: apache
+    #notify: restart_apache
 
-    - name: Enable and restart apache server
-      tags: apache
-      service:
-        name: apache2
-        state: restarted
-        enabled: true
-      when: apache.changed
+- hosts: webServer
+  become: true
+  remote_user: ubuntu
+  tasks:
 
-    - name: Install Mariadb server
-      tags: db
-      apt:
-        name: mariadb-server
-        state: latest
-    
-    - name: Install fileserver
-      tags: fileserver
-      apt:
-        name: samba
-        state: latest
+  - name: Enable and restart apache server
+    tags: apache, centos
+    service:
+      name: "{{ apache_service_name }}"
+      state: restarted
+      enabled: true
+    when: apache.changed
+
+  - name: Copy default apache file
+    copy:
+      src: index.html
+      dest: /var/www/html/index.html
+      owner: root
+      group: root
+      mode: 0644
+    #register: copyFile
+
+  - name: Update default apache file on remote
+    lineinfile:
+      path: /var/www/html/index.html
+      # regexp: '^<h1>'
+      # line: '<h1>Hello, World from {{ansible_nodename}}!</h1>'
+      regexp: '^(\s*)<h1>.*</h1>'
+      line: '\1<h1>Hello, World from {{ansible_eth0.ipv4.address}} -{{ansible_nodename}}!</h1>'
+      backrefs: yes
+    #when: copyFile.changed
+
+- hosts: databaseServer
+  become: true
+  remote_user: ubuntu
+  tasks:
+
+  - name: Install Mariadb server
+    tags: db
+    apt:
+      name: mariadb-server
+      state: latest
+
+- hosts: fileServer    
+  become: true
+  remote_user: ubuntu
+  tasks:
+
+  - name: Install fileserver
+    tags: fileserver
+    apt:
+      name: samba
+      state: latest
